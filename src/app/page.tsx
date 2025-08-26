@@ -13,6 +13,56 @@ import { useState } from "react";
 
 export default function Home() {
   const [messages, setMessages] = useState<MessageModel[]>([]);
+
+  const handleSendMessage = async (innerHtml: String, textContent: String, innerText: String, nodes: NodeList) => {
+    const userMessage: MessageModel = {
+      message: textContent as string,
+      sentTime: new Date().toLocaleTimeString(),
+      sender: "me",
+      direction: "outgoing",
+      position: "last",
+    };
+
+    // Add user message to chat
+    setMessages(prev => [...prev, userMessage]);
+
+    try {
+      // Call the API endpoint
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: innerText }),
+      });
+
+      if (response.ok) {
+        const botResponse = await response.json();
+        setMessages(prev => [...prev, botResponse]);
+      } else {
+        // Handle error
+        const errorMessage: MessageModel = {
+          message: "Sorry, I couldn't process your message.",
+          sentTime: new Date().toLocaleTimeString(),
+          sender: "Bot",
+          direction: "incoming",
+          position: "last",
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      const errorMessage: MessageModel = {
+        message: "Sorry, there was an error processing your message.",
+        sentTime: new Date().toLocaleTimeString(),
+        sender: "Bot",
+        direction: "incoming",
+        position: "last",
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    }
+  };
+
   return (
     <div style={{ position: "relative", height: "500px" }}>
       <MainContainer>
@@ -24,17 +74,7 @@ export default function Home() {
           </MessageList>
           <MessageInput
             placeholder="Type message here"
-            onSend={(innerHtml: String, textContent: String, innerText: String, nodes: NodeList) => 
-              {
-                setMessages([...messages, {
-                  message: textContent as string,
-                  sentTime: "just now",
-                  sender: "me",
-                  direction: "outgoing",
-                  position: "last",
-                }])
-              }
-            }
+            onSend={handleSendMessage}
           />
         </ChatContainer>
       </MainContainer>
