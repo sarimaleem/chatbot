@@ -14,9 +14,9 @@ import { useState } from "react";
 export default function Home() {
   const [messages, setMessages] = useState<MessageModel[]>([]);
 
-  const handleSendMessage = async (innerHtml: String, textContent: String, innerText: String, nodes: NodeList) => {
+  const handleSendMessage = async (innerHtml: string, textContent: string, innerText: string, nodes: NodeList) => {
     const userMessage: MessageModel = {
-      message: textContent as string,
+      message: textContent,
       sentTime: new Date().toLocaleTimeString(),
       sender: "me",
       direction: "outgoing",
